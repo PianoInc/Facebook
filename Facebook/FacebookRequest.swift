@@ -8,7 +8,6 @@
 
 import FBSDKCoreKit
 import FBSDKLoginKit
-import SwiftyJSON
 
 typealias FacebookBinder = ([FacebookData]) -> ()
 
@@ -45,17 +44,18 @@ class FacebookRequest: NSObject {
             let request = FBSDKGraphRequest(graphPath: "/\(pageId)/posts", parameters: param)
             request!.start { (_, result, _) in
                 guard let result = result else {return}
-                let json = JSON(result)
-                guard let data = json["data"].array else {return}
+                guard let resultData = try? JSONSerialization.data(withJSONObject: result, options: .prettyPrinted) else {return}
+                guard let json = try? JSONSerialization.jsonObject(with: resultData, options: .allowFragments) as? [String: Any] else {return}
+                guard let data = json?["data"] as? [[String: Any]] else {return}
                 
                 self.postCursor = nil
-                if let paging = json["paging"].dictionary, let next = paging["next"]?.string {
+                if let paging = json?["paging"] as? [String: Any], let next = paging["next"] as? String {
                     self.postCursor = String(next[next.index(lastOf: "=")...])
                 }
                 
                 let loadData = data.filter({
-                    return $0["name"].string != nil && $0["message"].string != nil &&
-                        $0["comments"].dictionary != nil
+                    return $0["name"] as? String != nil && $0["message"] as? String != nil &&
+                        $0["comments"] as? [String: Any] != nil
                 }).map {PostData(data: $0, isSection: false)}
                 
                 if !loadData.isEmpty {
@@ -79,16 +79,17 @@ class FacebookRequest: NSObject {
             let request = FBSDKGraphRequest(graphPath: "/\(postId)/comments", parameters: param)
             request!.start { (_, result, _) in
                 guard let result = result else {return}
-                let json = JSON(result)
-                guard let data = json["data"].array else {return}
+                guard let resultData = try? JSONSerialization.data(withJSONObject: result, options: .prettyPrinted) else {return}
+                guard let json = try? JSONSerialization.jsonObject(with: resultData, options: .allowFragments) as? [String: Any] else {return}
+                guard let data = json?["data"] as? [[String: Any]] else {return}
                 
                 self.commentCursor = nil
-                if let paging = json["paging"].dictionary, let next = paging["next"]?.string {
+                if let paging = json?["paging"] as? [String: Any], let next = paging["next"] as? String {
                     self.commentCursor = String(next[next.index(lastOf: "=")...])
                 }
                 
                 let loadData = data.map {
-                    CommentData(data: $0, hasReply: $0["comment_count"].stringValue != "0")
+                    CommentData(data: $0, hasReply: $0["comment_count"]as? String != "0")
                 }
                 
                 if !loadData.isEmpty {
@@ -113,11 +114,12 @@ class FacebookRequest: NSObject {
             let request = FBSDKGraphRequest(graphPath: "/\(commentId)/comments", parameters: param)
             request!.start { (_, result, _) in
                 guard let result = result else {return}
-                let json = JSON(result)
-                guard let data = json["data"].array else {return}
+                guard let resultData = try? JSONSerialization.data(withJSONObject: result, options: .prettyPrinted) else {return}
+                guard let json = try? JSONSerialization.jsonObject(with: resultData, options: .allowFragments) as? [String: Any] else {return}
+                guard let data = json?["data"] as? [[String: Any]] else {return}
                 
                 var nextCursor: String! = nil
-                if let paging = json["paging"].dictionary, let next = paging["next"]?.string {
+                if let paging = json?["paging"] as? [String: Any], let next = paging["next"] as? String {
                     nextCursor = String(next[next.index(lastOf: "=")...])
                 }
                 

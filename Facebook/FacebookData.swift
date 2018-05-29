@@ -6,12 +6,10 @@
 //  Copyright © 2018년 piano. All rights reserved.
 //
 
-import SwiftyJSON
-
 /// Facebook의 data type protocol.
 public protocol FacebookData {
     
-    var data: JSON {get set}
+    var data: [String : Any] {get set}
     /// 이 data의 id값.
     var id: String {get}
     /// 이 data를 page관리자가 작성했는지의 여부를 반환한다.
@@ -26,16 +24,16 @@ public protocol FacebookData {
 public extension FacebookData {
     
     public var id: String {
-        return data["id"].string ?? ""
+        return data["id"] as? String ?? ""
     }
     public var isAdmin: Bool {
-        return data["from"].dictionary != nil
+        return data["from"] as? [String : Any] != nil
     }
     public var message: String {
-        return data["message"].string ?? ""
+        return data["message"] as? String ?? ""
     }
     public var time: Date {
-        guard let create = data["created_time"].string else {return Date()}
+        guard let create = data["created_time"] as? String else {return Date()}
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withFullDate, .withDashSeparatorInDate,
                                    .withTime, .withColonSeparatorInTime]
@@ -48,7 +46,7 @@ public extension FacebookData {
 /// Facebook의 post data.
 public struct PostData: FacebookData {
     
-    public var data: JSON
+    public var data: [String : Any]
     /// PostData가 section data인지의 여부.
     public var isSection: Bool
     
@@ -57,12 +55,12 @@ public struct PostData: FacebookData {
 /// Facebook의 comment data.
 public struct CommentData: FacebookData {
     
-    public var data: JSON
+    public var data: [String : Any]
     /// CommentData가 하위 replyData를 가지는지의 여부.
     public var hasReply: Bool
     /// CommentData가 가지는 reply data의 갯수.
     public var replyCount: Int {
-        return data["comment_count"].int ?? 0
+        return data["comment_count"] as? Int ?? 0
     }
     
 }
@@ -70,7 +68,7 @@ public struct CommentData: FacebookData {
 /// Facebook의 reply data.
 public struct ReplyData: FacebookData {
     
-    public var data: JSON
+    public var data: [String : Any]
     /// ReplyData가 속하는 comment data의 id값.
     public var parentId: String
     /// ReplyData의 추가적인 request에서 다음 data 위치를 지시하는 cursor값.

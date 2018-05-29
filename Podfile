@@ -6,7 +6,6 @@ target 'Facebook' do
   use_frameworks!
 
   # Pods for Facebook
-  pod 'SwiftyJSON'
   pod 'FBSDKLoginKit'
 
   target 'FacebookTests' do
