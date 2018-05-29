@@ -8,6 +8,7 @@
 
 import Foundation
 
+/// Facebook ListView에 사용될 public cell protocol.
 public protocol FacebookCell {
     
     static var reuseIdentifier: String { get }

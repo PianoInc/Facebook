@@ -14,6 +14,7 @@ public enum PostRowShape {
     case single, top, middle, bottom
 }
 
+/// Facebook post 내용을 표기할 listView의 DataSource.
 public class PostDataSource<Section: UITableViewCell, Row: UITableViewCell>:
     NSObject, UITableViewDelegate, UITableViewDataSource, UITableViewDataSourcePrefetching
 where Section: FacebookCell, Row: FacebookCell {

@@ -8,6 +8,7 @@
 
 import UIKit
 
+/// Facebook comment / reply 내용을 표기할 listView의 DataSource.
 public class CommentDataSource<Post: UITableViewCell, Comment: UITableViewCell, Reply: UITableViewCell>:
     NSObject, UITableViewDelegate, UITableViewDataSource, UITableViewDataSourcePrefetching
 where Post: FacebookCell, Comment: FacebookCell, Reply: FacebookCell {
@@ -19,6 +20,9 @@ where Post: FacebookCell, Comment: FacebookCell, Reply: FacebookCell {
     private var data = [FacebookData]()
     
     private var postData: PostData!
+    
+    /// CommentDataSource RowCell selection closure
+    public var didSelectRowAt: ((FacebookData) -> ())?
     
     public init(_ viewCtrl: UIViewController, listView: UITableView,
                 postData: PostData, notReady: @escaping (() -> ())) {
@@ -104,23 +108,20 @@ where Post: FacebookCell, Comment: FacebookCell, Reply: FacebookCell {
     
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
+        didSelectRowAt?(data[indexPath.row])
         if let cData = data[indexPath.row] as? CommentData {
             guard cData.hasReply else {return}
             var mcData = cData
             mcData.hasReply = false
             data[indexPath.row] = mcData
-            UIView.performWithoutAnimation {
-                tableView.reloadRows(at: [indexPath], with: .fade)
-            }
+            tableView.reloadRows(at: [indexPath], with: .fade)
             facebookRequest.reply(from: cData.id)
         } else if let rData = data[indexPath.row] as? ReplyData {
             guard rData.hasCursor != nil else {return}
             var mrData = rData
             mrData.hasCursor = nil
             data[indexPath.row] = mrData
-            UIView.performWithoutAnimation {
-                tableView.reloadRows(at: [indexPath], with: .fade)
-            }
+            tableView.reloadRows(at: [indexPath], with: .fade)
             facebookRequest.reply(from: rData.parentId, with: rData.hasCursor)
         }
     }

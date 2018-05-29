@@ -58,7 +58,7 @@ public struct PostData: FacebookData {
 public struct CommentData: FacebookData {
     
     public var data: JSON
-    /// CommentData가 section data인지의 여부를 반환한다.
+    /// CommentData가 하위 replyData를 가지는지의 여부.
     public var hasReply: Bool
     /// CommentData가 가지는 reply data의 갯수.
     public var replyCount: Int {
